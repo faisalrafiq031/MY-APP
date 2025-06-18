@@ -6,9 +6,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Security Settings
 SECRET_KEY = os.environ.get("SECRET_KEY", get_random_secret_key())
-DEBUG = False
+DEBUG=True
 ALLOWED_HOSTS = ['*']  # Replace with your domain in production
-CSRF_TRUSTED_ORIGINS = ['https://*.vercel.app', 'https://*.yourdomain.com']
+CSRF_TRUSTED_ORIGINS = ['https://*.vercel.app', 'https://my-app-eta-jade.vercel.app/']
 
 # Application Definition
 INSTALLED_APPS = [
