@@ -1,0 +1,102 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="p-4">
+    <h1 class="mb-4">Database Designer</h1>
+    
+    <div class="card bg-dark text-white mb-4">
+        <div class="card-body">
+            <ul class="nav nav-tabs mb-4" id="designerTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="create-tab" data-bs-toggle="tab" data-bs-target="#create" type="button" role="tab">Create Table</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="insert-tab" data-bs-toggle="tab" data-bs-target="#insert" type="button" role="tab">Insert Data</button>
+                </li>
+            </ul>
+            
+            <div class="tab-content" id="designerTabsContent">
+                <!-- Create Table Tab -->
+                <div class="tab-pane fade show active" id="create" role="tabpanel">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Table name:</label>
+                            <input type="text" name="table_name" class="form-control bg-dark text-white" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Columns (e.g., id INTEGER PRIMARY KEY, name TEXT):</label>
+                            <textarea name="columns_input" class="form-control bg-dark text-white" rows="4" required></textarea>
+                        </div>
+                        <button type="submit" name="create_table" class="btn btn-primary">Create Table</button>
+                    </form>
+                    {% if create_result %}{{ create_result|safe }}{% endif %}
+                </div>
+                
+                <!-- Insert Data Tab -->
+                <div class="tab-pane fade" id="insert" role="tabpanel">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Choose table:</label>
+                            <select name="selected_table" id="selected_table" class="form-select bg-dark text-white" required>
+                                <option value="">Select a table</option>
+                                {% for table in tables %}
+                                <option value="{{ table }}">{{ table }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div id="columns-container" class="mb-3">
+                            <div class="alert alert-info">Select a table to see its columns</div>
+                        </div>
+                        
+                        <button type="submit" name="insert_record" class="btn btn-primary">Insert Record</button>
+                    </form>
+                    {% if insert_result %}{{ insert_result|safe }}{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Fetch columns when table is selected
+document.getElementById('selected_table').addEventListener('change', function() {
+    const table = this.value;
+    if (!table) {
+        document.getElementById('columns-container').innerHTML = '<div class="alert alert-info">Select a table to see its columns</div>';
+        return;
+    }
+
+    // ✅ FIXED URL here:
+    fetch(`/get-columns/?table=${table}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('columns-container').innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                return;
+            }
+
+            let html = '';
+            data.columns.forEach(col => {
+                html += `
+                <div class="mb-3">
+                    <label class="form-label">${col.name} (${col.type})</label>
+                    <input type="text" name="col_${col.name}" class="form-control bg-dark text-white" required>
+                </div>`;
+            });
+
+            if (!html) {
+                html = '<div class="alert alert-warning">No columns found for this table</div>';
+            }
+
+            document.getElementById('columns-container').innerHTML = html;
+        })
+        .catch(error => {
+            document.getElementById('columns-container').innerHTML = `<div class="alert alert-danger">Error fetching columns: ${error.message}</div>`;
+        });
+});
+</script>
+{% endblock %}

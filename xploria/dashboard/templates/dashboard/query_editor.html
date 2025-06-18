@@ -1,0 +1,54 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="p-4">
+    <h1 class="mb-4">SQL Query Editor</h1>
+    
+    <div class="card bg-dark text-white mb-4">
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Write your SQL queries below:</label>
+                    <div id="editor" style="height: 200px; border: 1px solid #14655B;">{{ query_input }}</div>
+                    <textarea name="query" id="query-input" class="d-none">{{ query_input }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Execute Query</button>
+            </form>
+            
+            {% if query_result %}
+            <div class="mt-4">
+                <h5>Query Results:</h5>
+                <div class="scroll-table mt-3">
+                    {{ query_result|safe }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    // Initialize ACE Editor
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/theme/dracula");
+    editor.session.setMode("ace/mode/sql");
+    editor.setFontSize(14);
+    editor.setOptions({
+        enableBasicAutocompletion: true,
+        enableLiveAutocompletion: true
+    });
+    
+    // Update hidden textarea before form submission
+    document.querySelector('form').addEventListener('submit', function() {
+        document.getElementById('query-input').value = editor.getValue();
+    });
+    
+    // Set initial value if any
+    editor.setValue(document.getElementById('query-input').value || "");
+    editor.clearSelection();
+</script>
+{% endblock %}
+{% endblock %}

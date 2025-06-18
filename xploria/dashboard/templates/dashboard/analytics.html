@@ -1,0 +1,54 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="p-4">
+    <h1 class="mb-4">Analytics & Insights</h1>
+
+    <div class="card bg-dark text-white mb-4">
+        <div class="card-body">
+            <h3 class="mb-3">Database Overview</h3>
+
+            {% if table_data %}
+            <div class="scroll-table mb-4">
+                {{ table_data|safe }}
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="mb-3">Row Count per Table</h5>
+                    <div id="chart1" class="chart-container"></div>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="mb-3">Tools by Rating</h5>
+                    <div id="chart2" class="chart-container"></div>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">No tables found in the database</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if chart1 or chart2 %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const chart1Data = '{{ chart1|escapejs|default:"null" }}';
+        const chart2Data = '{{ chart2|escapejs|default:"null" }}';
+
+        const chart1 = chart1Data !== "null" ? JSON.parse(chart1Data) : null;
+        const chart2 = chart2Data !== "null" ? JSON.parse(chart2Data) : null;
+
+        if (chart1) {
+            vegaEmbed('#chart1', chart1, {actions: false}).catch(console.error);
+        }
+
+        if (chart2) {
+            vegaEmbed('#chart2', chart2, {actions: false}).catch(console.error);
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}
+ 

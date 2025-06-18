@@ -1,0 +1,37 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="p-4">
+    <h1 class="mb-4">Database Table Viewer</h1>
+    
+    <div class="card bg-dark text-white mb-4">
+        <div class="card-body">
+            <form method="GET" class="row">
+                <div class="col-md-8 mb-3">
+                    <select name="table" class="form-select bg-dark text-white">
+                        <option value="">Select a table</option>
+                        {% for table in tables %}
+                        <option value="{{ table }}" {% if table == selected_table %}selected{% endif %}>{{ table }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <button type="submit" class="btn btn-primary w-100">Load Table Data</button>
+                </div>
+            </form>
+            
+            {% if table_data %}
+            <div class="scroll-table mt-3">
+                {{ table_data|safe }}
+            </div>
+            <p class="mt-2 text-muted" style="color: #ccc;" >Showing top 100 rows from <strong>{{ selected_table }}</strong></p>
+            {% elif selected_table %}
+            <div class="alert alert-warning mt-3">No data found for table: {{ selected_table }}</div>
+            {% else %}
+            <div class="alert alert-info mt-3">Select a table to view its data</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
